@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRS - Quản Lý Tài Sản</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f4f7f6;
+        }
+
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .mermaid-wrapper {
+            margin: 30px 0;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .api-list {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 20px;
+        }
+
+        code {
+            background-color: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            color: #d926a9;
+        }
+
+        /* Tabs CSS */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: #3498db;
+        }
+
+        .tab-btn.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+
+        .tab-content {
+            position: absolute;
+            visibility: hidden;
+            opacity: 0;
+            left: -9999px;
+        }
+
+        .tab-content.active {
+            position: relative;
+            visibility: visible;
+            opacity: 1;
+            left: 0;
+            animation: fadeIn 0.4s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .markdown-ul {
+            padding-left: 20px;
+        }
+
+        .markdown-ul li {
+            margin-bottom: 8px;
+        }
+    </style>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+    <script>
+        function openTab(evt, tabId) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Tài Liệu Đặc Tả Yêu Cầu Phần Mềm (SRS) - Tính Năng Quản Lý Tài Sản</h1>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab(event, 'tab1')">Mô tả Nghiệp vụ & API</button>
+            <button class="tab-btn" onclick="openTab(event, 'tab2')">Sơ đồ & Cấu trúc Dữ liệu</button>
+        </div>
+
+        <!-- TAB 1: MÔ TẢ NGHIỆP VỤ (Từ file Markdown) -->
+        <div id="tab1" class="tab-content active">
+            <h2>1. Tổng quan</h2>
+            <p>Tính năng <strong>Quản lý tài sản</strong> giúp doanh nghiệp số hóa toàn bộ vòng đời của tài sản (POSM,
+                tủ lạnh, kệ trưng bày, v.v.) từ khi nhập kho, cấp phát cho nhân viên hoặc cửa hàng (đại lý), đến quá
+                trình kiểm kê, điều chuyển, thu hồi và thanh lý.</p>
+            <p>Thông qua việc phân tích các API hiện có trong hệ thống (<code>omni-service</code>), tài liệu này mô tả
+                chi tiết các luồng nghiệp vụ và danh sách API tương ứng để phục vụ cho việc phát triển và tích hợp.</p>
+
+            <h2>2. Phân tích các phân hệ nghiệp vụ chính</h2>
+            <p>Dựa vào mã nguồn định tuyến (<code>routes/auth/saleman.php</code>), hệ thống quản lý tài sản được chia
+                thành 5 phân hệ chính:</p>
+
+            <h3>2.1. Quản lý Danh mục tài sản & Tồn kho tài sản (Warehouse Assets)</h3>
+            <ul class="markdown-ul">
+                <li><strong>Mô tả:</strong> Phân hệ này quản lý danh sách tài sản đang nằm trong kho chưa được cấp phát
+                    (hoặc tài sản thu hồi về kho). Hỗ trợ theo dõi số lượng tồn kho theo số serial và đếm số lượng tài
+                    sản mà mỗi nhân viên đang quản lý.</li>
+                <li><strong>Các API liên quan:</strong>
+                    <ul>
+                        <li><code>GET /admin/list-warehouse-assets</code>: Lấy danh sách tồn kho tài sản (có hỗ trợ phân
+                            trang/limit).</li>
+                        <li><code>GET /admin/detail-warehouse-asset/{id}</code>: Lấy chi tiết thông tin của một tài sản
+                            trong kho.</li>
+                        <li><code>POST /admin/import-warehouse-assets</code>: Nhập khẩu (import) danh sách tài sản vào
+                            kho bằng file Excel/CSV.</li>
+                        <li><code>GET /admin/export-warehouse-assets-by-serial</code>: Xuất danh sách tài sản trong kho
+                            theo số Serial.</li>
+                        <li><code>GET /admin/export-warehouse-inventories</code>: Xuất báo cáo tồn kho tài sản.</li>
+                        <li><code>GET /count-warehouse-assets-by-user-code</code>: Thống kê số lượng tài sản theo mã
+                            nhân viên.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>2.2. Quản lý Yêu cầu Cấp phát/Điều chuyển/Thu hồi (Export/Import Asset Requests)</h3>
+            <ul class="markdown-ul">
+                <li><strong>Mô tả:</strong> Ghi nhận và xử lý các luồng yêu cầu di chuyển tài sản (Từ Kho -> Cửa hàng,
+                    Cửa hàng -> Cửa hàng, hoặc Cửa hàng -> Kho). Đây chính là phần nghiệp vụ thay thế cho
+                    <code>asset-allocation-requests</code>.</li>
+                <li><strong>Các API liên quan:</strong>
+                    <ul>
+                        <li><code>GET /get-export-import-assets</code>: Lấy danh sách các phiếu yêu cầu (nhập, xuất,
+                            điều chuyển).</li>
+                        <li><code>GET /get-detail-export-import-assets/{id}</code>: Xem chi tiết một phiếu yêu cầu.</li>
+                        <li><code>POST /request-export-import-assets</code>: Tạo mới yêu cầu cấp phát, điều chuyển, thu
+                            hồi tài sản.</li>
+                        <li><code>PUT /update-status-export-import-assets/{id}</code>: Phê duyệt / Từ chối / Hoàn thành
+                            yêu cầu.</li>
+                        <li><code>PUT /update-export-import-assets/{id}</code>: Cập nhật thông tin phiếu yêu cầu.</li>
+                        <li><code>DELETE /delete-export-import-assets/{id}</code>: Hủy phiếu yêu cầu.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>2.3. Quản lý Danh mục Thiết bị/Tài sản lõi (Assets & Master Data)</h3>
+            <ul class="markdown-ul">
+                <li><strong>Mô tả:</strong> Phân hệ định nghĩa các loại tài sản, thiết bị có trong hệ thống, cấu hình
+                    thông tin cơ bản trước khi đưa vào kho.</li>
+                <li><strong>Các API liên quan:</strong>
+                    <ul>
+                        <li><code>GET /assets</code> & <code>GET /list-all-assets</code>: Xem danh sách tất cả tài sản
+                            định nghĩa trong hệ thống.</li>
+                        <li><code>GET /list-master-data-asset</code>: Lấy dữ liệu danh mục chuẩn (Master data) để làm
+                            nguồn cho các màn hình Dropdown/Select.</li>
+                        <li><code>POST /assets</code> & <code>PUT /assets/{id}</code> &
+                            <code>DELETE /assets/{id}</code>: Các thao tác Thêm, Sửa, Xóa tài sản hệ thống.</li>
+                        <li><code>GET /assets/{id}</code>: Lấy chi tiết một loại tài sản.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>2.4. Quản lý Tài sản tại Điểm bán / Đại lý (Assets of Shops)</h3>
+            <ul class="markdown-ul">
+                <li><strong>Mô tả:</strong> Quản lý thực trạng tài sản đang được đặt tại các đại lý, cửa hàng. Cho phép
+                    gắn tài sản cho cửa hàng và nhân viên bán hàng có thể quét mã QR để ghi nhận tình trạng tài sản thực
+                    tế.</li>
+                <li><strong>Các API liên quan:</strong>
+                    <ul>
+                        <li><code>POST /create-asset-of-shops</code>: Gắn/bàn giao tài sản cho cửa hàng.</li>
+                        <li><code>GET /list-asset-of-shops</code> & <code>GET /list-asset-of-shops/{shopCode}</code>:
+                            Lấy danh sách tài sản đang được trưng bày tại các cửa hàng (có thể lọc theo mã cửa hàng).
+                        </li>
+                        <li><code>GET /saleman/list-asset-of-shops</code>: Nhân viên Sale lấy danh sách tài sản của cửa
+                            hàng mình phụ trách.</li>
+                        <li><code>GET /list-asset-by-sale-or-shops</code>: Lấy danh sách tài sản lọc theo Sale hoặc theo
+                            Shop.</li>
+                        <li><code>POST /scan-qr-assets</code>: Quét mã QR để kiểm tra và xác nhận tài sản tại cửa hàng.
+                        </li>
+                        <li><code>GET /get-history-scan-qr-assets</code>: Lịch sử nhân viên quét mã QR tài sản.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>2.5. Kiểm kê tài sản (Inventory of Assets)</h3>
+            <ul class="markdown-ul">
+                <li><strong>Mô tả:</strong> Tính năng tạo các đợt kiểm kê tài sản định kỳ. Quản lý tiến độ kiểm kê, báo
+                    cáo chênh lệch và lịch sử kiểm kê tài sản.</li>
+                <li><strong>Các API liên quan:</strong>
+                    <ul>
+                        <li><code>GET /inventory-of-assets</code> & <code>POST /inventory-of-assets</code>: Xem danh
+                            sách đợt kiểm kê và tạo mới đợt kiểm kê.</li>
+                        <li><code>GET /inventory-of-assets/{id}</code> & <code>PUT /inventory-of-assets/{id}</code> &
+                            <code>DELETE /inventory-of-assets/{id}</code>: Xem chi tiết, sửa và xóa đợt kiểm kê.</li>
+                        <li><code>PUT /update-inventory-of-assets/{id}</code>: Cập nhật kết quả kiểm kê thực tế của tài
+                            sản.</li>
+                        <li><code>GET /list-inventory-of-assets-by-manager/{id}</code>: Lấy danh sách kiểm kê thuộc
+                            quyền quản lý của một cấp quản lý.</li>
+                        <li><code>GET /admin/list-asset-history-by-assets</code>: Lấy lịch sử biến động/kiểm kê theo
+                            từng tài sản.</li>
+                        <li><code>GET /admin/report-history-inventory-of-assets</code>: Báo cáo tổng hợp kết quả của các
+                            đợt kiểm kê.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h2>3. Luồng nghiệp vụ cơ bản (Use Cases)</h2>
+
+            <h3>Luồng 1: Nhập tài sản vào kho và định nghĩa tài sản</h3>
+            <ol>
+                <li>Admin vào màn hình tạo định nghĩa tài sản mới (Gọi API <code>POST /assets</code>).</li>
+                <li>Admin thực hiện nhập kho hàng loạt (Nhập lô tài sản kèm Serial/QR Code) (Gọi API
+                    <code>POST /admin/import-warehouse-assets</code>).</li>
+                <li>Dữ liệu được ghi nhận vào tồn kho tài sản (Hiển thị qua
+                    <code>GET /admin/list-warehouse-assets</code>).</li>
+            </ol>
+
+            <h3>Luồng 2: Yêu cầu Cấp phát / Thu hồi tài sản</h3>
+            <ol>
+                <li>Nhân viên Sale tạo lệnh yêu cầu cấp phát hoặc thu hồi tài sản cho điểm bán (Gọi API
+                    <code>POST /request-export-import-assets</code>).</li>
+                <li>Quản lý vào màn hình kiểm duyệt để phê duyệt phiếu (Gọi API
+                    <code>PUT /update-status-export-import-assets/{id}</code>).</li>
+                <li>Sau khi phiếu được duyệt, tài sản sẽ tự động được cập nhật trừ/cộng vào Kho và gắn/gỡ khỏi Shop
+                    tương ứng.</li>
+            </ol>
+
+            <h3>Luồng 3: Theo dõi và Kiểm kê tài sản tại điểm bán</h3>
+            <ol>
+                <li>Nhân viên Sale đi thị trường viếng thăm Cửa hàng.</li>
+                <li>Dùng App Mobile lấy danh sách tài sản cần kiểm tra của Cửa hàng đó.</li>
+                <li>Dùng Camera quét QR Code để thực hiện kiểm kê tài sản, xác nhận tài sản có còn ở điểm bán hay hỏng
+                    hóc gì không.</li>
+                <li>Kết quả kiểm kê (khớp, lệch, mất mát, hỏng hóc) được đồng bộ lên hệ thống.</li>
+            </ol>
+
+            <h2>4. Tổng kết</h2>
+            <p>Dựa trên các API đã phân tích, hệ thống hiện tại đã đáp ứng một bộ khung rất hoàn chỉnh về Quản lý tài
+                sản (Asset Lifecycle Management) gồm: <strong>Định nghĩa danh mục -&gt; Nhập kho -&gt; Điều chuyển/Cấp
+                    phát -&gt; Quản lý điểm bán (QR Code) -&gt; Kiểm kê</strong>.</p>
+            <p>Trường hợp API <code>v1/asset-allocation-requests</code> trong gợi ý, hệ thống của bạn thực chất đang
+                dùng các từ khóa như <code>export-import-assets</code> để định nghĩa luồng cấp phát/điều chuyển này.</p>
+        </div>
+
+        <!-- TAB 2: SƠ ĐỒ VÀ BẢNG DỮ LIỆU -->
+        <div id="tab2" class="tab-content">
+            <h2>1. Sơ Đồ Luồng Tổng Thể (Overall Workflow)</h2>
+            <p>Biểu đồ dưới đây mô tả vòng đời của một tài sản từ khi định nghĩa, nhập kho, cấp phát cho đến khi kiểm
+                kê.
+            </p>
+
+            <div class="mermaid-wrapper">
+                <div class="mermaid">
+                    flowchart TD
+                    A[Admin] -->|1. Tao Master Data| B(Danh muc Tai san)
+                    A -->|2. Import Nhap kho| C(Kho Tai san)
+
+                    F[Nhan vien Sale] -->|3. Tao lenh Cap phat/Thu hoi| D{Phieu Yeu Cau}
+                    D -.->|Tru/Cong ton| C
+                    D -->|Duyet| E(Tai san tai Shop)
+
+                    F -->|4. Vieng tham| E
+                    E -->|5. Quet QR Kiem ke| G(Ket qua: Binh thuong/Hong hoc/Mat)
+                    G -.->|Cap nhat| E
+                </div>
+            </div>
+
+            <h2>2. Chi Tiết Bảng Dữ Liệu Các Phân Hệ</h2>
+
+            <h3>2.1. Quản lý Danh mục tài sản (Master Assets)</h3>
+            <p>Bảng trường dữ liệu (Master Asset Table):</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên trường</th>
+                        <th>Kiểu dữ liệu</th>
+                        <th>Bắt buộc</th>
+                        <th>Mô tả</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>ID định danh loại tài sản</td>
+                    </tr>
+                    <tr>
+                        <td>asset_code</td>
+                        <td>String</td>
+                        <td>Có</td>
+                        <td>Mã tài sản (VD: TULANH_01)</td>
+                    </tr>
+                    <tr>
+                        <td>asset_name</td>
+                        <td>String</td>
+                        <td>Có</td>
+                        <td>Tên loại tài sản</td>
+                    </tr>
+                    <tr>
+                        <td>asset_category_id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>Nhóm tài sản (Tủ lạnh, Kệ, POSM...)</td>
+                    </tr>
+                    <tr>
+                        <td>description</td>
+                        <td>Text</td>
+                        <td>Không</td>
+                        <td>Mô tả đặc điểm kỹ thuật</td>
+                    </tr>
+                    <tr>
+                        <td>status</td>
+                        <td>TinyInt</td>
+                        <td>Có</td>
+                        <td>Trạng thái hoạt động (1: Active, 0: Inactive)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2.2. Quản lý Tồn kho tài sản (Warehouse Assets)</h3>
+            <p>Bảng trường dữ liệu chi tiết tồn kho (Warehouse Asset Table):</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên trường</th>
+                        <th>Kiểu dữ liệu</th>
+                        <th>Bắt buộc</th>
+                        <th>Mô tả</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>ID bản ghi tồn kho</td>
+                    </tr>
+                    <tr>
+                        <td>asset_id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>Liên kết với Master Asset</td>
+                    </tr>
+                    <tr>
+                        <td>serial_number</td>
+                        <td>String</td>
+                        <td>Có</td>
+                        <td>Số Serial duy nhất của từng tài sản vật lý</td>
+                    </tr>
+                    <tr>
+                        <td>qr_code</td>
+                        <td>String</td>
+                        <td>Không</td>
+                        <td>Mã QR định danh dán trên tài sản</td>
+                    </tr>
+                    <tr>
+                        <td>warehouse_id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>Kho lưu trữ hiện tại</td>
+                    </tr>
+                    <tr>
+                        <td>status</td>
+                        <td>String</td>
+                        <td>Có</td>
+                        <td>Tình trạng (Mới, Cũ, Đang sử dụng, Hỏng...)</td>
+                    </tr>
+                    <tr>
+                        <td>is_allocated</td>
+                        <td>Boolean</td>
+                        <td>Có</td>
+                        <td>Đã xuất kho hay chưa</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2.3. Phiếu Yêu cầu Cấp phát / Thu hồi (Export/Import Asset Requests)</h3>
+            <p>Bảng trường dữ liệu Phiếu yêu cầu (Allocation Request Table):</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên trường</th>
+                        <th>Kiểu dữ liệu</th>
+                        <th>Bắt buộc</th>
+                        <th>Mô tả</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>ID phiếu yêu cầu</td>
+                    </tr>
+                    <tr>
+                        <td>request_code</td>
+                        <td>String</td>
+                        <td>Có</td>
+                        <td>Mã phiếu sinh tự động (VD: REQ_001)</td>
+                    </tr>
+                    <tr>
+                        <td>type</td>
+                        <td>String</td>
+                        <td>Có</td>
+                        <td>Loại phiếu (EXPORT: Cấp phát, IMPORT: Thu hồi, TRANSFER: Điều chuyển)</td>
+                    </tr>
+                    <tr>
+                        <td>shop_id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>Cửa hàng/Đại lý nhận hoặc trả tài sản</td>
+                    </tr>
+                    <tr>
+                        <td>saleman_id</td>
+                        <td>Integer</td>
+                        <td>Không</td>
+                        <td>Nhân viên phụ trách luân chuyển</td>
+                    </tr>
+                    <tr>
+                        <td>status</td>
+                        <td>String</td>
+                        <td>Có</td>
+                        <td>Trạng thái (PENDING, APPROVED, REJECTED, COMPLETED)</td>
+                    </tr>
+                    <tr>
+                        <td>note</td>
+                        <td>Text</td>
+                        <td>Không</td>
+                        <td>Ghi chú lý do</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>Bảng chi tiết phiếu (Request Details):</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên trường</th>
+                        <th>Kiểu dữ liệu</th>
+                        <th>Bắt buộc</th>
+                        <th>Mô tả</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>ID dòng chi tiết</td>
+                    </tr>
+                    <tr>
+                        <td>request_id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>ID của phiếu yêu cầu cha</td>
+                    </tr>
+                    <tr>
+                        <td>warehouse_asset_id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>ID của tài sản cụ thể (Dựa vào Serial)</td>
+                    </tr>
+                    <tr>
+                        <td>quantity</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>Thường là 1 (vì theo dõi theo Serial)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2.4. Quản lý Tài sản tại Điểm bán (Assets of Shops)</h3>
+            <p>Bảng trường dữ liệu Tài sản tại cửa hàng (Shop Asset Table):</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên trường</th>
+                        <th>Kiểu dữ liệu</th>
+                        <th>Bắt buộc</th>
+                        <th>Mô tả</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>ID bản ghi</td>
+                    </tr>
+                    <tr>
+                        <td>shop_id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>ID cửa hàng sở hữu</td>
+                    </tr>
+                    <tr>
+                        <td>warehouse_asset_id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>Tài sản vật lý đang đặt ở đây</td>
+                    </tr>
+                    <tr>
+                        <td>installed_date</td>
+                        <td>Datetime</td>
+                        <td>Có</td>
+                        <td>Ngày bàn giao/Lắp đặt</td>
+                    </tr>
+                    <tr>
+                        <td>last_scanned_at</td>
+                        <td>Datetime</td>
+                        <td>Không</td>
+                        <td>Lần cuối nhân viên tới quét QR xác nhận</td>
+                    </tr>
+                    <tr>
+                        <td>last_scanned_by</td>
+                        <td>Integer</td>
+                        <td>Không</td>
+                        <td>ID nhân viên thực hiện quét QR</td>
+                    </tr>
+                    <tr>
+                        <td>image_url</td>
+                        <td>String</td>
+                        <td>Không</td>
+                        <td>Hình ảnh minh chứng thực tế</td>
+                    </tr>
+                    <tr>
+                        <td>lat_long</td>
+                        <td>String</td>
+                        <td>Không</td>
+                        <td>Tọa độ GPS khi quét mã</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2.5. Kiểm kê tài sản (Inventory of Assets)</h3>
+            <p>Bảng trường dữ liệu Phiếu Kiểm kê (Inventory Table):</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên trường</th>
+                        <th>Kiểu dữ liệu</th>
+                        <th>Bắt buộc</th>
+                        <th>Mô tả</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>ID đợt kiểm kê</td>
+                    </tr>
+                    <tr>
+                        <td>inventory_code</td>
+                        <td>String</td>
+                        <td>Có</td>
+                        <td>Mã đợt kiểm kê</td>
+                    </tr>
+                    <tr>
+                        <td>title</td>
+                        <td>String</td>
+                        <td>Có</td>
+                        <td>Tên đợt (VD: Kiểm kê Q3/2026)</td>
+                    </tr>
+                    <tr>
+                        <td>scope_type</td>
+                        <td>String</td>
+                        <td>Có</td>
+                        <td>Phạm vi (ALL, WAREHOUSE, SHOP)</td>
+                    </tr>
+                    <tr>
+                        <td>status</td>
+                        <td>String</td>
+                        <td>Có</td>
+                        <td>Trạng thái (PLANNING, IN_PROGRESS, FINISHED)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>Bảng chi tiết chênh lệch kiểm kê (Inventory Details Table):</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên trường</th>
+                        <th>Kiểu dữ liệu</th>
+                        <th>Bắt buộc</th>
+                        <th>Mô tả</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>ID chi tiết</td>
+                    </tr>
+                    <tr>
+                        <td>inventory_id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>ID đợt kiểm kê cha</td>
+                    </tr>
+                    <tr>
+                        <td>warehouse_asset_id</td>
+                        <td>Integer</td>
+                        <td>Có</td>
+                        <td>Tài sản được kiểm tra</td>
+                    </tr>
+                    <tr>
+                        <td>expected_location</td>
+                        <td>String</td>
+                        <td>Có</td>
+                        <td>Vị trí lý thuyết trên hệ thống</td>
+                    </tr>
+                    <tr>
+                        <td>actual_location</td>
+                        <td>String</td>
+                        <td>Không</td>
+                        <td>Vị trí thực tế ghi nhận</td>
+                    </tr>
+                    <tr>
+                        <td>is_matched</td>
+                        <td>Boolean</td>
+                        <td>Có</td>
+                        <td>Khớp hay Lệch</td>
+                    </tr>
+                    <tr>
+                        <td>note</td>
+                        <td>Text</td>
+                        <td>Không</td>
+                        <td>Lý do lệch (Mất, hỏng...)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
