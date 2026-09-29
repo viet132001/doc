@@ -278,24 +278,26 @@
                 </li>
             </ul>
 
-            <h3>2.5. Kiểm kê tài sản (Inventory of Assets)</h3>
+            <h3>2.5. Quản lý Tồn kho tài sản (Inventory of Assets)</h3>
             <ul class="markdown-ul">
-                <li><strong>Mô tả:</strong> Tính năng tạo các đợt kiểm kê tài sản định kỳ. Quản lý tiến độ kiểm kê, báo
-                    cáo chênh lệch và lịch sử kiểm kê tài sản.</li>
+                <li><strong>Mô tả:</strong> Phân hệ lưu trữ và quản lý danh sách thông tin tài sản thực tế trong hệ
+                    thống (kho quản lý). Các kết quả quét QR (kiểm kê) tại điểm bán sẽ tự động cập nhật về đây để quản
+                    lý biết được tình trạng tài sản. <em>(Không có tính năng tạo đợt kiểm kê định kỳ)</em>.</li>
                 <li><strong>Các API liên quan:</strong>
                     <ul>
                         <li><code>GET /inventory-of-assets</code> & <code>POST /inventory-of-assets</code>: Xem danh
-                            sách đợt kiểm kê và tạo mới đợt kiểm kê.</li>
+                            sách và thêm mới thông tin tồn kho tài sản.</li>
                         <li><code>GET /inventory-of-assets/{id}</code> & <code>PUT /inventory-of-assets/{id}</code> &
-                            <code>DELETE /inventory-of-assets/{id}</code>: Xem chi tiết, sửa và xóa đợt kiểm kê.</li>
-                        <li><code>PUT /update-inventory-of-assets/{id}</code>: Cập nhật kết quả kiểm kê thực tế của tài
-                            sản.</li>
-                        <li><code>GET /list-inventory-of-assets-by-manager/{id}</code>: Lấy danh sách kiểm kê thuộc
-                            quyền quản lý của một cấp quản lý.</li>
-                        <li><code>GET /admin/list-asset-history-by-assets</code>: Lấy lịch sử biến động/kiểm kê theo
+                            <code>DELETE /inventory-of-assets/{id}</code>: Xem chi tiết, sửa và xóa thông tin tài sản
+                            trong kho.</li>
+                        <li><code>PUT /update-inventory-of-assets/{id}</code>: Cập nhật tình trạng thực tế của tài sản
+                            (dựa trên kết quả Sale quét QR báo về).</li>
+                        <li><code>GET /list-inventory-of-assets-by-manager/{id}</code>: Lấy danh sách tài sản tồn kho
+                            thuộc quyền quản lý của một cấp quản lý.</li>
+                        <li><code>GET /admin/list-asset-history-by-assets</code>: Lấy lịch sử biến động trạng thái theo
                             từng tài sản.</li>
-                        <li><code>GET /admin/report-history-inventory-of-assets</code>: Báo cáo tổng hợp kết quả của các
-                            đợt kiểm kê.</li>
+                        <li><code>GET /admin/report-history-inventory-of-assets</code>: Báo cáo tổng hợp lịch sử tồn
+                            kho/cập nhật tài sản.</li>
                     </ul>
                 </li>
             </ul>
@@ -414,8 +416,8 @@
                 </tbody>
             </table>
 
-            <h3>2.2. Quản lý Tồn kho tài sản (Warehouse Assets)</h3>
-            <p>Bảng trường dữ liệu chi tiết tồn kho (Warehouse Asset Table):</p>
+            <h3>2.2. Quản lý Tồn kho tài sản (Inventory of Assets)</h3>
+            <p>Bảng Quản lý tồn kho (Inventory of Assets Table - Kho chứa thông tin tài sản và kho quản lý):</p>
             <table>
                 <thead>
                     <tr>
@@ -567,7 +569,8 @@
             </table>
 
             <h3>2.4. Quản lý Tài sản tại Điểm bán (Assets of Shops)</h3>
-            <p>Bảng trường dữ liệu Tài sản tại cửa hàng (Shop Asset Table):</p>
+            <p>Bảng Tài sản tại cửa hàng (Asset of Shops Table - Thông tin tài sản đã cấp phát cho khách hàng/shop nào):
+            </p>
             <table>
                 <thead>
                     <tr>
@@ -629,8 +632,8 @@
                 </tbody>
             </table>
 
-            <h3>2.5. Kiểm kê tài sản (Inventory of Assets)</h3>
-            <p>Bảng trường dữ liệu Phiếu Kiểm kê (Inventory Table):</p>
+            <h3>2.5. Kiểm kê tài sản (Scan QR Assets)</h3>
+            <p>Bảng Ghi nhận Kiểm kê (Scan QR Assets Table - Ghi nhận đợt kiểm kê tài sản, xác nhận tình trạng):</p>
             <table>
                 <thead>
                     <tr>
@@ -645,90 +648,36 @@
                         <td>id</td>
                         <td>Integer</td>
                         <td>Có</td>
-                        <td>ID đợt kiểm kê</td>
+                        <td>ID lần kiểm kê (quét QR)</td>
                     </tr>
                     <tr>
-                        <td>inventory_code</td>
-                        <td>String</td>
+                        <td>asset_of_shop_id</td>
+                        <td>Integer</td>
                         <td>Có</td>
-                        <td>Mã đợt kiểm kê</td>
+                        <td>ID của tài sản đang đặt tại Shop</td>
                     </tr>
                     <tr>
-                        <td>title</td>
-                        <td>String</td>
+                        <td>scanned_by</td>
+                        <td>Integer</td>
                         <td>Có</td>
-                        <td>Tên đợt (VD: Kiểm kê Q3/2026)</td>
+                        <td>ID Nhân viên Sale thực hiện kiểm kê</td>
                     </tr>
                     <tr>
-                        <td>scope_type</td>
-                        <td>String</td>
+                        <td>is_present</td>
+                        <td>Boolean</td>
                         <td>Có</td>
-                        <td>Phạm vi (ALL, WAREHOUSE, SHOP)</td>
+                        <td>Tài sản có đang ở điểm bán không?</td>
                     </tr>
                     <tr>
-                        <td>status</td>
+                        <td>condition_status</td>
                         <td>String</td>
                         <td>Có</td>
-                        <td>Trạng thái (PLANNING, IN_PROGRESS, FINISHED)</td>
+                        <td>Trạng thái (Bình thường, Hỏng hóc, Mất...)</td>
                     </tr>
                 </tbody>
             </table>
 
-            <p>Bảng chi tiết chênh lệch kiểm kê (Inventory Details Table):</p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Tên trường</th>
-                        <th>Kiểu dữ liệu</th>
-                        <th>Bắt buộc</th>
-                        <th>Mô tả</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>id</td>
-                        <td>Integer</td>
-                        <td>Có</td>
-                        <td>ID chi tiết</td>
-                    </tr>
-                    <tr>
-                        <td>inventory_id</td>
-                        <td>Integer</td>
-                        <td>Có</td>
-                        <td>ID đợt kiểm kê cha</td>
-                    </tr>
-                    <tr>
-                        <td>warehouse_asset_id</td>
-                        <td>Integer</td>
-                        <td>Có</td>
-                        <td>Tài sản được kiểm tra</td>
-                    </tr>
-                    <tr>
-                        <td>expected_location</td>
-                        <td>String</td>
-                        <td>Có</td>
-                        <td>Vị trí lý thuyết trên hệ thống</td>
-                    </tr>
-                    <tr>
-                        <td>actual_location</td>
-                        <td>String</td>
-                        <td>Không</td>
-                        <td>Vị trí thực tế ghi nhận</td>
-                    </tr>
-                    <tr>
-                        <td>is_matched</td>
-                        <td>Boolean</td>
-                        <td>Có</td>
-                        <td>Khớp hay Lệch</td>
-                    </tr>
-                    <tr>
-                        <td>note</td>
-                        <td>Text</td>
-                        <td>Không</td>
-                        <td>Lý do lệch (Mất, hỏng...)</td>
-                    </tr>
-                </tbody>
-            </table>
+
         </div>
     </div>
 </body>
