@@ -64,8 +64,8 @@ Thêm logic xử lý trong hàm `processDataSource()` nếu cần xử lý đặ
 ## Ví dụ các loại dữ liệu
 
 ### Điểm bán hàng (data_users.js) - Rule đặc biệt
-- **Màu đỏ**: Wall (sync_dms = null)
-- **Màu cam**: Đại Thuận (sync_dms = "Y")
+- **Màu đỏ**: Khách hàng đối tác (sync_dms = null)
+- **Màu cam**: Khách hàng nội bộ (sync_dms = "Y")
 - **Icon cố định**: 🏪
 - **Rule**: Phải tuân theo rule sync_dms để phân loại màu sắc
 
