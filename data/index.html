@@ -1,0 +1,1296 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Phiếu giao hàng</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#0f1730;
+      --panel2:#121c3a;
+      --text:#e9edff;
+      --muted:#a9b2d6;
+      --line:rgba(255,255,255,.12);
+      --good:#2dd4bf;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+      --chip:#1a2550;
+      --focus:rgba(99,102,241,.35);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#f6f7ff;
+        --panel:#ffffff;
+        --panel2:#f4f6ff;
+        --text:#0b1020;
+        --muted:#44507a;
+        --line:rgba(10,20,60,.12);
+        --chip:#eef1ff;
+        --shadow: 0 10px 30px rgba(10,20,60,.10);
+      }
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(99,102,241,.25), transparent 55%),
+                  radial-gradient(900px 600px at 100% 10%, rgba(45,212,191,.18), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+    }
+
+    .wrap{
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 18px 16px 40px;
+    }
+
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .title h1{
+      margin: 0 0 4px;
+      font-size: 22px;
+      letter-spacing: .2px;
+    }
+    .title p{
+      margin:0;
+      color implying: var(--muted);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .top-actions{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button, .btn{
+      appearance:none;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+      transition: transform .08s ease, border-color .15s ease, background .15s ease;
+      font-weight: 600;
+      font-size: 13px;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      user-select:none;
+    }
+    button:hover{ transform: translateY(-1px); border-color: rgba(99,102,241,.45); }
+    button:active{ transform: translateY(0); }
+    button:focus{ outline:none; box-shadow: 0 0 0 4px var(--focus), 0 6px 18px rgba(0,0,0,.15); }
+
+    .btn-ghost{
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 340px 1fr;
+      gap: 14px;
+      align-items: start;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 1100px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      gap: 10px;
+      background: rgba(255,255,255,.03);
+    }
+    .panel-header h2{
+      margin:0;
+      font-size: 14px;
+      letter-spacing:.2px;
+    }
+    .panel-body{ padding: 14px; }
+
+    /* KPI */
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 10px;
+      margin: 10px 0 4px;
+    }
+    @media (max-width: 1100px){
+      .kpis{ grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+    }
+    @media (max-width: 520px){
+      .kpis{ grid-template-columns: 1fr; }
+    }
+    .kpi{
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px 12px 10px;
+    }
+    .kpi .label{
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .kpi .value{
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing:.2px;
+    }
+    .kpi .sub{
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      display:flex;
+      gap: 8px;
+      align-items:center;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;
+      background: rgba(255,255,255,.35);
+      display:inline-block;
+    }
+    .dot.good{ background: var(--good); }
+    .dot.warn{ background: var(--warn); }
+    .dot.bad{ background: var(--bad); }
+
+    /* Filters */
+    .filters{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 1100px){
+      .filters{ grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 520px){
+      .filters{ grid-template-columns: 1fr; }
+    }
+
+    label{ display:block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    input, select{
+      width:100%;
+      padding: 10px 11px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.12);
+      color: var(--text);
+      font-size: 13px;
+      outline:none;
+    }
+    @media (prefers-color-scheme: light){
+      input, select{ background: rgba(10,20,60,.03); }
+    }
+    input:focus, select:focus{
+      box-shadow: 0 0 0 4px var(--focus);
+      border-color: rgba(99,102,241,.55);
+    }
+    .row{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+    .row > *{ flex: 1; }
+    .help{
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .chip{
+      display:inline-flex;
+      gap: 6px;
+      align-items:center;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      background: var(--chip);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--text);
+      margin: 6px 6px 0 0;
+      user-select:none;
+    }
+    .chips{ margin-top: 8px; }
+
+    /* Table */
+    .table-wrap{
+      overflow:auto;
+      border-radius: var(--radius);
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.02);
+    }
+
+    table{
+      width:100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 1400px;
+      font-size: 13px;
+    }
+
+    thead th{
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,.06);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+      padding: 10px 10px;
+      text-align:left;
+      font-size: 12px;
+      color: var(--muted);
+      z-index: 3;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select:none;
+    }
+    thead th .sort{
+      font-family: var(--mono);
+      font-size: 11px;
+      opacity:.8;
+      margin-left: 6px;
+    }
+
+    tbody td{
+      border-bottom: 1px solid var(--line);
+      padding: 10px 10px;
+      vertical-align: top;
+      color: var(--text);
+      background: rgba(255,255,255,.01);
+    }
+    tbody tr:hover td{ background: rgba(99,102,241,.06); }
+    tbody tr{ cursor: pointer; }
+
+    .muted{ color: var(--muted); }
+    .mono{ font-family: var(--mono); font-size: 12px; }
+    .nowrap{ white-space: nowrap; }
+    .money{ text-align:right; font-variant-numeric: tabular-nums; }
+    .addr{ max-width: 520px; }
+
+    /* Sticky first columns */
+    .sticky-1, .sticky-2{
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: rgba(255,255,255,.02);
+    }
+    .sticky-2{ left: 170px; }
+    thead .sticky-1, thead .sticky-2{
+      z-index: 4;
+      background: rgba(255,255,255,.08);
+    }
+    /* widths for sticky columns */
+    th.sticky-1, td.sticky-1{ min-width: 170px; max-width: 170px; }
+    th.sticky-2, td.sticky-2{ min-width: 210px; max-width: 210px; }
+
+    /* Badges */
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .badge .b{ width:8px; height:8px; border-radius:999px; background: rgba(255,255,255,.35); }
+    .badge.good .b{ background: var(--good); }
+    .badge.warn .b{ background: var(--warn); }
+    .badge.bad  .b{ background: var(--bad); }
+
+    /* Footer / pagination */
+    .table-footer{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      background: rgba(255,255,255,.02);
+      flex-wrap: wrap;
+    }
+    .pager{
+      display:flex;
+      gap: 8px;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+    .pager .meta{
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .pager select{ width: auto; padding: 8px 10px; }
+
+    /* Dialog */
+    dialog{
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 0;
+      background: var(--panel);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      width: min(920px, calc(100vw - 24px));
+    }
+    dialog::backdrop{ background: rgba(0,0,0,.55); }
+    .dlg-head{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      background: rgba(255,255,255,.03);
+    }
+    .dlg-head h3{ margin:0; font-size: 14px; }
+    .dlg-body{ padding: 14px; }
+    .kv{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 14px;
+    }
+    @media (max-width: 720px){
+      .kv{ grid-template-columns: 1fr; }
+    }
+    .kv .item{
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px 11px;
+      background: rgba(255,255,255,.02);
+    }
+    .kv .k{ font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .kv .v{ font-size: 13px; line-height: 1.35; word-break: break-word; }
+    .dlg-actions{
+      padding: 12px 14px 14px;
+      display:flex;
+      justify-content:flex-end;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .hide-sm{ display: table-cell; }
+    @media (max-width: 980px){
+      .hide-sm{ display:none; }
+      table{ min-width: 980px; }
+      .sticky-2{ left: 170px; } /* keep */
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Dashboard Phiếu giao hàng</h1>
+        <p>Table + bộ lọc + sort + phân trang + export CSV + xem chi tiết (mockup theo dữ liệu bạn cung cấp)</p>
+      </div>
+
+      <div class="top-actions">
+        <button id="btnExport" title="Xuất CSV theo dữ liệu đang lọc">
+          ⤓ Export CSV
+        </button>
+        <button id="btnReset" class="btn-ghost" title="Reset toàn bộ bộ lọc">
+          ↺ Reset lọc
+        </button>
+      </div>
+    </header>
+
+    <section class="kpis" aria-label="Tổng quan">
+      <div class="kpi">
+        <div class="label">Tổng đơn (theo lọc)</div>
+        <div class="value" id="kpiTotal">0</div>
+        <div class="sub"><span class="dot"></span><span id="kpiTotalSub">—</span></div>
+      </div>
+      <div class="kpi">
+        <div class="label">Chờ giao hàng</div>
+        <div class="value" id="kpiPending">0</div>
+        <div class="sub"><span class="dot warn"></span><span>Trạng thái giao hàng = Chờ giao hàng</span></div>
+      </div>
+      <div class="kpi">
+        <div class="label">Hoàn thành / Giao thành công</div>
+        <div class="value" id="kpiDone">0</div>
+        <div class="sub"><span class="dot good"></span><span>Giao thành công / Hoàn thành</span></div>
+      </div>
+      <div class="kpi">
+        <div class="label">Tổng thành tiền</div>
+        <div class="value" id="kpiAmount">0</div>
+        <div class="sub"><span class="dot"></span><span>VNĐ (sum theo lọc)</span></div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <!-- FILTERS -->
+      <aside class="panel" aria-label="Bộ lọc">
+        <div class="panel-header">
+          <h2>Bộ lọc</h2>
+          <span class="muted" style="font-size:12px">Tự tối ưu: lọc nhanh + lọc nâng cao</span>
+        </div>
+        <div class="panel-body">
+          <div class="filters">
+            <div>
+              <label for="q">Tìm nhanh</label>
+              <input id="q" placeholder="Số đơn, số chứng từ, khách hàng, địa chỉ…" />
+            </div>
+
+            <div>
+              <label for="source">Nguồn</label>
+              <select id="source">
+                <option value="">Tất cả</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="type">Loại</label>
+              <select id="type">
+                <option value="">Tất cả</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="deliveryStatus">Trạng thái giao hàng</label>
+              <select id="deliveryStatus">
+                <option value="">Tất cả</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="ticketStatus">Trạng thái phiếu</label>
+              <select id="ticketStatus">
+                <option value="">Tất cả</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="reconStatus">Trạng thái đối soát</label>
+              <select id="reconStatus">
+                <option value="">Tất cả</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="paymentStatus">Trạng thái thanh toán</label>
+              <select id="paymentStatus">
+                <option value="">Tất cả</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="receiveStatus">Trạng thái nhận hàng</label>
+              <select id="receiveStatus">
+                <option value="">Tất cả</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="customerCode">Mã khách hàng</label>
+              <input id="customerCode" placeholder="VD: 2897964" />
+            </div>
+
+            <div>
+              <label for="salesCode">Mã NVBH</label>
+              <input id="salesCode" placeholder="VD: 3000375" />
+            </div>
+
+            <div>
+              <label for="orderDateFrom">Ngày đơn hàng (từ)</label>
+              <input id="orderDateFrom" type="date" />
+            </div>
+
+            <div>
+              <label for="orderDateTo">Ngày đơn hàng (đến)</label>
+              <input id="orderDateTo" type="date" />
+            </div>
+
+            <div>
+              <label for="amountMin">Tổng tiền (từ)</label>
+              <input id="amountMin" type="number" min="0" step="1000" placeholder="0" />
+            </div>
+
+            <div>
+              <label for="amountMax">Tổng tiền (đến)</label>
+              <input id="amountMax" type="number" min="0" step="1000" placeholder="Không giới hạn" />
+            </div>
+          </div>
+
+          <div class="help">
+            Ghi chú: các trường <b>Ngày giao hàng / Trạng thái phiếu / Đối soát / Thanh toán / Nhận hàng / Thực giao / Trực nhận</b>
+            có thể <b>trống</b> cho đến khi NVGH hoàn thành đơn.
+          </div>
+
+          <div class="chips" id="activeChips" aria-label="Bộ lọc đang áp dụng"></div>
+        </div>
+      </aside>
+
+      <!-- TABLE -->
+      <main class="panel" aria-label="Bảng phiếu giao hàng">
+        <div class="panel-header">
+          <h2>Danh sách phiếu giao hàng</h2>
+          <div class="row" style="max-width: 420px;">
+            <div>
+              <label for="pageSize" class="muted" style="margin:0 0 6px;">Số dòng/trang</label>
+              <select id="pageSize">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+            <div style="align-self:end;">
+              <button id="btnClearSort" class="btn-ghost" title="Bỏ sắp xếp">
+                ⇅ Clear sort
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-body" style="padding: 12px;">
+          <div class="table-wrap" role="region" aria-label="Bảng dữ liệu cuộn ngang">
+            <table id="tbl">
+              <thead>
+                <tr>
+                  <th data-key="orderNo" class="sticky-1">Số đơn hàng <span class="sort" id="s-orderNo"></span></th>
+                  <th data-key="voucherNo" class="sticky-2">Số chứng từ <span class="sort" id="s-voucherNo"></span></th>
+
+                  <th data-key="source" class="nowrap">Nguồn <span class="sort" id="s-source"></span></th>
+                  <th data-key="type" class="nowrap">Loại <span class="sort" id="s-type"></span></th>
+                  <th data-key="orderDate" class="nowrap">Ngày đơn hàng <span class="sort" id="s-orderDate"></span></th>
+                  <th data-key="deliveryDate" class="nowrap hide-sm">Ngày giao hàng <span class="sort" id="s-deliveryDate"></span></th>
+
+                  <th data-key="customerCode" class="nowrap">Mã KH <span class="sort" id="s-customerCode"></span></th>
+                  <th data-key="customerName">Khách hàng <span class="sort" id="s-customerName"></span></th>
+                  <th data-key="shipTo" class="addr">Địa chỉ giao <span class="sort" id="s-shipTo"></span></th>
+
+                  <th data-key="deliveryStatus" class="nowrap">TT giao hàng <span class="sort" id="s-deliveryStatus"></span></th>
+                  <th data-key="ticketStatus" class="nowrap hide-sm">TT phiếu <span class="sort" id="s-ticketStatus"></span></th>
+                  <th data-key="reconStatus" class="nowrap hide-sm">TT đối soát <span class="sort" id="s-reconStatus"></span></th>
+                  <th data-key="paymentStatus" class="nowrap hide-sm">TT thanh toán <span class="sort" id="s-paymentStatus"></span></th>
+                  <th data-key="receiveStatus" class="nowrap hide-sm">TT nhận hàng <span class="sort" id="s-receiveStatus"></span></th>
+
+                  <th data-key="actualDelivered" class="nowrap hide-sm">Thực giao <span class="sort" id="s-actualDelivered"></span></th>
+                  <th data-key="directReceive" class="nowrap hide-sm">Trực nhận <span class="sort" id="s-directReceive"></span></th>
+
+                  <th data-key="salesCode" class="nowrap">Mã NVBH <span class="sort" id="s-salesCode"></span></th>
+                  <th data-key="salesName" class="nowrap hide-sm">Tên NVBH <span class="sort" id="s-salesName"></span></th>
+
+                  <th data-key="totalAmount" class="nowrap">Tổng tiền <span class="sort" id="s-totalAmount"></span></th>
+                  <th data-key="note" class="hide-sm">Ghi chú <span class="sort" id="s-note"></span></th>
+
+                  <th data-key="createdBy" class="nowrap hide-sm">Người tạo <span class="sort" id="s-createdBy"></span></th>
+                  <th data-key="createdAt" class="nowrap hide-sm">Ngày tạo <span class="sort" id="s-createdAt"></span></th>
+                  <th data-key="updatedBy" class="nowrap hide-sm">Người cập nhật <span class="sort" id="s-updatedBy"></span></th>
+                  <th data-key="updatedAt" class="nowrap hide-sm">Ngày cập nhật <span class="sort" id="s-updatedAt"></span></th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="table-footer" aria-label="Phân trang">
+            <div class="pager">
+              <button id="btnPrev" class="btn-ghost">← Prev</button>
+              <button id="btnNext" class="btn-ghost">Next →</button>
+              <div class="meta" id="pageMeta">—</div>
+            </div>
+            <div class="meta" id="resultMeta">—</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Detail dialog -->
+  <dialog id="dlg">
+    <div class="dlg-head">
+      <h3 id="dlgTitle">Chi tiết phiếu</h3>
+      <button id="dlgClose" class="btn-ghost">✕ Đóng</button>
+    </div>
+    <div class="dlg-body">
+      <div class="kv" id="dlgKv"></div>
+    </div>
+    <div class="dlg-actions">
+      <button id="btnCopyJson" class="btn">⎘ Copy JSON</button>
+      <button id="btnClose2" class="btn-ghost">Đóng</button>
+    </div>
+  </dialog>
+
+<script>
+/** =========
+ *  MOCK DATA (đổi DATA bằng API/DB của bạn)
+ *  ========= */
+const DATA = [
+  {
+    orderNo: "ATN-HCM-26011910299214",
+    voucherNo: "AAR-260117063255",
+    source: "DMS",
+    type: "TAISAN",
+    orderDate: "19/01/2026",
+    deliveryDate: "", // trống cho đến khi NVGH nhận đơn
+    customerCode: "2897964",
+    customerName: "Dương Văn Tư_I0T2-",
+    shipTo: "- 43G An Bình - Phường 5 - Quận 5",
+    deliveryStatus: "Chờ giao hàng",
+    ticketStatus: "",
+    reconStatus: "",
+    paymentStatus: "",
+    receiveStatus: "",
+    actualDelivered: "",
+    directReceive: "",
+    salesCode: "3000375",
+    salesName: "PHAN HÒA HIỆP,",
+    totalAmount: 0,
+    note: "",
+    createdBy: "",
+    createdAt: "",
+    updatedBy: "",
+    updatedAt: ""
+  },
+  {
+    orderNo: "ATN-HCM-26011910299214",
+    voucherNo: "AAR-260117063255",
+    source: "DMS",
+    type: "TAISAN",
+    orderDate: "19/01/2026",
+    deliveryDate: "",
+    customerCode: "2897964",
+    customerName: "Dương Văn Tư_I0T2-",
+    shipTo: "- 43G An Bình - Phường 5 - Quận 5",
+    deliveryStatus: "Chờ giao hàng",
+    ticketStatus: "",
+    reconStatus: "",
+    paymentStatus: "",
+    receiveStatus: "",
+    actualDelivered: "",
+    directReceive: "",
+    salesCode: "3000375",
+    salesName: "PHAN HÒA HIỆP,",
+    totalAmount: 0,
+    note: "",
+    createdBy: "",
+    createdAt: "",
+    updatedBy: "",
+    updatedAt: ""
+  },
+  {
+    orderNo: "ATN-HCM-26011910299214",
+    voucherNo: "",
+    source: "DMS",
+    type: "BANHANG",
+    orderDate: "19/01/2026",
+    deliveryDate: "",
+    customerCode: "3149711",
+    customerName: "Hà Mỹ Anh-ITT7-",
+    shipTo: "- 413/42/14 Lê Văn Quới - phường Bình Trị Đông A - Quận Bình Tân",
+    deliveryStatus: "Chờ giao hàng",
+    ticketStatus: "",
+    reconStatus: "",
+    paymentStatus: "",
+    receiveStatus: "",
+    actualDelivered: "",
+    directReceive: "",
+    salesCode: "3000357",
+    salesName: "PHẠM VĂN NGHĨA,",
+    totalAmount: 0,
+    note: "",
+    createdBy: "",
+    createdAt: "",
+    updatedBy: "",
+    updatedAt: ""
+  },
+  {
+    orderNo: "20014",
+    voucherNo: "",
+    source: "ERP",
+    type: "BANHANG",
+    orderDate: "19/01/2026",
+    deliveryDate: "19/01/2026",
+    customerCode: "2000970-00281",
+    customerName: "BHX_DTH_CLA - Kho DC mini Đồng Mát Cao Lãnh",
+    shipTo: "Thửa đất 181-1023, tờ bản đồ số 6, khóm Thuận Phú, Phường Hòa Thuận, Thành phố Cao Lãnh, Tỉnh Đồng Tháp",
+    deliveryStatus: "Giao thành công một phần",
+    ticketStatus: "Hoàn thành",
+    reconStatus: "Chờ đối soát",
+    paymentStatus: "Trả sau",
+    receiveStatus: "FULL",
+    actualDelivered: "",
+    directReceive: "",
+    salesCode: "3000351",
+    salesName: "PHẠM VĂN NGHĨA,",
+    totalAmount: 29348192,
+    note: "Đơn hàng bán NPP",
+    createdBy: "",
+    createdAt: "",
+    updatedBy: "",
+    updatedAt: ""
+  },
+  {
+    orderNo: "20014",
+    voucherNo: "",
+    source: "ERP",
+    type: "BANHANG",
+    orderDate: "19/01/2026",
+    deliveryDate: "19/01/2026",
+    customerCode: "2000970-00281",
+    customerName: "BHX_DTH_CLA - Kho DC mini Đồng Mát Cao Lãnh",
+    shipTo: "Thửa đất 181-1023, tờ bản đồ số 6, khóm Thuận Phú, Phường Hòa Thuận, Thành phố Cao Lãnh, Tỉnh Đồng Tháp",
+    deliveryStatus: "Giao thành công một phần",
+    ticketStatus: "Hoàn thành",
+    reconStatus: "Chờ đối soát",
+    paymentStatus: "Trả sau",
+    receiveStatus: "FULL",
+    actualDelivered: "",
+    directReceive: "",
+    salesCode: "3000350",
+    salesName: "ĐINH TẤN THẮNG,",
+    totalAmount: 3455232,
+    note: "Đơn hàng đồng bộ ERP",
+    createdBy: "Nguyễn Minh Tuấn",
+    createdAt: "19-01-2026 11:57:40",
+    updatedBy: "Nguyễn Minh Tuấn",
+    updatedAt: "19-01-2026 11:57:40"
+  },
+  {
+    orderNo: "20014",
+    voucherNo: "",
+    source: "ERP",
+    type: "BANHANG",
+    orderDate: "19/01/2026",
+    deliveryDate: "19/01/2026",
+    customerCode: "2000970-00281",
+    customerName: "BHX_DTH_CLA - Kho DC mini Đồng Mát Cao Lãnh",
+    shipTo: "Thửa đất 181-1023, tờ bản đồ số 6, khóm Thuận Phú, Phường Hòa Thuận, Thành phố Cao Lãnh, Tỉnh Đồng Tháp",
+    deliveryStatus: "Giao thành công một phần",
+    ticketStatus: "Hoàn thành",
+    reconStatus: "Chờ đối soát",
+    paymentStatus: "Trả sau",
+    receiveStatus: "FULL",
+    actualDelivered: "",
+    directReceive: "",
+    salesCode: "3000350",
+    salesName: "ĐINH TẤN THẮNG,",
+    totalAmount: 3455232,
+    note: "Đơn hàng đồng bộ ERP",
+    createdBy: "Nguyễn Minh Tuấn",
+    createdAt: "19-01-2026 11:57:40",
+    updatedBy: "Nguyễn Minh Tuấn",
+    updatedAt: "19-01-2026 11:57:40"
+  }
+];
+
+/** =========
+ *  Helpers
+ *  ========= */
+const $ = (id) => document.getElementById(id);
+
+function norm(v){ return (v ?? "").toString().trim(); }
+function lower(v){ return norm(v).toLowerCase(); }
+
+function parseDDMMYYYY(s){
+  // "19/01/2026"
+  const t = norm(s);
+  if(!t) return null;
+  const m = t.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(!m) return null;
+  const [_, dd, mm, yyyy] = m;
+  return new Date(Number(yyyy), Number(mm)-1, Number(dd), 0,0,0,0);
+}
+function parseDDMMYYYY_HHMMSS(s){
+  // "19-01-2026 11:57:40"
+  const t = norm(s);
+  if(!t) return null;
+  const m = t.match(/^(\d{2})-(\d{2})-(\d{4})\s+(\d{2}):(\d{2}):(\d{2})$/);
+  if(!m) return null;
+  const [_, dd, mm, yyyy, hh, mi, ss] = m;
+  return new Date(Number(yyyy), Number(mm)-1, Number(dd), Number(hh), Number(mi), Number(ss), 0);
+}
+function fmtMoney(n){
+  const x = Number(n || 0);
+  return x.toLocaleString("vi-VN");
+}
+function isDoneRow(r){
+  const ds = lower(r.deliveryStatus);
+  const ts = lower(r.ticketStatus);
+  return ds.includes("giao thành công") || ts.includes("hoàn thành");
+}
+function badgeHTML(kind, text){
+  const cls = kind ? `badge ${kind}` : "badge";
+  return `<span class="${cls}"><span class="b"></span>${escapeHTML(text || "—")}</span>`;
+}
+function badgeKindForDelivery(s){
+  const t = lower(s);
+  if(!t) return "";
+  if(t.includes("chờ")) return "warn";
+  if(t.includes("thành công")) return "good";
+  return "";
+}
+function escapeHTML(str){
+  return norm(str).replace(/[&<>"']/g, (c)=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[c]));
+}
+function uniqueValues(arr, key){
+  const set = new Set(arr.map(x => norm(x[key])).filter(Boolean));
+  return Array.from(set).sort((a,b)=>a.localeCompare(b, "vi"));
+}
+function setSelectOptions(sel, values){
+  const keepFirst = sel.querySelector("option[value='']");
+  sel.innerHTML = "";
+  sel.appendChild(keepFirst);
+  values.forEach(v=>{
+    const opt = document.createElement("option");
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+}
+function debounce(fn, ms=180){
+  let t;
+  return (...args)=>{
+    clearTimeout(t);
+    t = setTimeout(()=>fn(...args), ms);
+  };
+}
+
+/** =========
+ *  State
+ *  ========= */
+let state = {
+  sortKey: "",
+  sortDir: "asc", // asc | desc
+  page: 1,
+  pageSize: 20,
+  filtered: [...DATA],
+};
+
+const filterEls = {
+  q: $("q"),
+  source: $("source"),
+  type: $("type"),
+  deliveryStatus: $("deliveryStatus"),
+  ticketStatus: $("ticketStatus"),
+  reconStatus: $("reconStatus"),
+  paymentStatus: $("paymentStatus"),
+  receiveStatus: $("receiveStatus"),
+  customerCode: $("customerCode"),
+  salesCode: $("salesCode"),
+  orderDateFrom: $("orderDateFrom"),
+  orderDateTo: $("orderDateTo"),
+  amountMin: $("amountMin"),
+  amountMax: $("amountMax"),
+};
+
+/** =========
+ *  Init
+ *  ========= */
+function init(){
+  // populate selects
+  setSelectOptions(filterEls.source, uniqueValues(DATA, "source"));
+  setSelectOptions(filterEls.type, uniqueValues(DATA, "type"));
+  setSelectOptions(filterEls.deliveryStatus, uniqueValues(DATA, "deliveryStatus"));
+  setSelectOptions(filterEls.ticketStatus, uniqueValues(DATA, "ticketStatus"));
+  setSelectOptions(filterEls.reconStatus, uniqueValues(DATA, "reconStatus"));
+  setSelectOptions(filterEls.paymentStatus, uniqueValues(DATA, "paymentStatus"));
+  setSelectOptions(filterEls.receiveStatus, uniqueValues(DATA, "receiveStatus"));
+
+  // attach filter listeners (debounced for text/number inputs)
+  const run = debounce(()=>applyFilters(), 160);
+  ["q","customerCode","salesCode","amountMin","amountMax"].forEach(k=>{
+    filterEls[k].addEventListener("input", run);
+  });
+  ["source","type","deliveryStatus","ticketStatus","reconStatus","paymentStatus","receiveStatus","orderDateFrom","orderDateTo"]
+    .forEach(k=> filterEls[k].addEventListener("change", ()=>applyFilters()));
+
+  // page size
+  $("pageSize").addEventListener("change", (e)=>{
+    state.pageSize = Number(e.target.value);
+    state.page = 1;
+    render();
+  });
+
+  // sort header
+  document.querySelectorAll("thead th[data-key]").forEach(th=>{
+    th.addEventListener("click", ()=>{
+      const k = th.getAttribute("data-key");
+      if(state.sortKey === k){
+        state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+      }else{
+        state.sortKey = k;
+        state.sortDir = "asc";
+      }
+      render();
+    });
+  });
+
+  $("btnClearSort").addEventListener("click", ()=>{
+    state.sortKey = "";
+    state.sortDir = "asc";
+    render();
+  });
+
+  // pager
+  $("btnPrev").addEventListener("click", ()=>{
+    state.page = Math.max(1, state.page - 1);
+    renderTableOnly();
+  });
+  $("btnNext").addEventListener("click", ()=>{
+    const totalPages = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
+    state.page = Math.min(totalPages, state.page + 1);
+    renderTableOnly();
+  });
+
+  // reset
+  $("btnReset").addEventListener("click", ()=>{
+    Object.values(filterEls).forEach(el=>{
+      if(el.tagName === "SELECT") el.value = "";
+      else el.value = "";
+    });
+    state.page = 1;
+    applyFilters();
+  });
+
+  // export
+  $("btnExport").addEventListener("click", ()=>{
+    exportCSV(state.filtered);
+  });
+
+  // dialog controls
+  const dlg = $("dlg");
+  $("dlgClose").addEventListener("click", ()=>dlg.close());
+  $("btnClose2").addEventListener("click", ()=>dlg.close());
+  $("btnCopyJson").addEventListener("click", ()=>{
+    const payload = dlg.dataset.rowJson || "{}";
+    navigator.clipboard?.writeText(payload);
+  });
+
+  applyFilters();
+}
+
+function collectFilters(){
+  return {
+    q: lower(filterEls.q.value),
+    source: norm(filterEls.source.value),
+    type: norm(filterEls.type.value),
+    deliveryStatus: norm(filterEls.deliveryStatus.value),
+    ticketStatus: norm(filterEls.ticketStatus.value),
+    reconStatus: norm(filterEls.reconStatus.value),
+    paymentStatus: norm(filterEls.paymentStatus.value),
+    receiveStatus: norm(filterEls.receiveStatus.value),
+    customerCode: lower(filterEls.customerCode.value),
+    salesCode: lower(filterEls.salesCode.value),
+    orderDateFrom: filterEls.orderDateFrom.value ? new Date(filterEls.orderDateFrom.value) : null,
+    orderDateTo: filterEls.orderDateTo.value ? new Date(filterEls.orderDateTo.value) : null,
+    amountMin: filterEls.amountMin.value ? Number(filterEls.amountMin.value) : null,
+    amountMax: filterEls.amountMax.value ? Number(filterEls.amountMax.value) : null,
+  };
+}
+
+function applyFilters(){
+  const f = collectFilters();
+  const out = DATA.filter(r=>{
+    // quick search
+    if(f.q){
+      const hay = [
+        r.orderNo, r.voucherNo, r.customerCode, r.customerName, r.shipTo,
+        r.salesCode, r.salesName, r.note
+      ].map(lower).join(" | ");
+      if(!hay.includes(f.q)) return false;
+    }
+
+    if(f.source && norm(r.source) !== f.source) return false;
+    if(f.type && norm(r.type) !== f.type) return false;
+    if(f.deliveryStatus && norm(r.deliveryStatus) !== f.deliveryStatus) return false;
+    if(f.ticketStatus && norm(r.ticketStatus) !== f.ticketStatus) return false;
+    if(f.reconStatus && norm(r.reconStatus) !== f.reconStatus) return false;
+    if(f.paymentStatus && norm(r.paymentStatus) !== f.paymentStatus) return false;
+    if(f.receiveStatus && norm(r.receiveStatus) !== f.receiveStatus) return false;
+
+    if(f.customerCode){
+      if(!lower(r.customerCode).includes(f.customerCode)) return false;
+    }
+    if(f.salesCode){
+      if(!lower(r.salesCode).includes(f.salesCode)) return false;
+    }
+
+    // date range on orderDate (dd/mm/yyyy)
+    const od = parseDDMMYYYY(r.orderDate);
+    if(f.orderDateFrom && od && od < startOfDay(f.orderDateFrom)) return false;
+    if(f.orderDateTo && od && od > endOfDay(f.orderDateTo)) return false;
+    if((f.orderDateFrom || f.orderDateTo) && !od) return false;
+
+    // amount range
+    const amt = Number(r.totalAmount || 0);
+    if(f.amountMin != null && amt < f.amountMin) return false;
+    if(f.amountMax != null && amt > f.amountMax) return false;
+
+    return true;
+  });
+
+  state.filtered = out;
+  state.page = 1;
+  render();
+}
+
+function startOfDay(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0,0,0,0); }
+function endOfDay(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23,59,59,999); }
+
+function applySort(rows){
+  const k = state.sortKey;
+  if(!k) return rows;
+
+  const dir = state.sortDir === "asc" ? 1 : -1;
+
+  const cmp = (a,b)=>{
+    const va = a[k];
+    const vb = b[k];
+
+    // numbers
+    if(k === "totalAmount"){
+      return (Number(va||0) - Number(vb||0)) * dir;
+    }
+
+    // dates
+    if(k === "orderDate" || k === "deliveryDate"){
+      const da = parseDDMMYYYY(va) || new Date(0);
+      const db = parseDDMMYYYY(vb) || new Date(0);
+      return (da - db) * dir;
+    }
+    if(k === "createdAt" || k === "updatedAt"){
+      const da = parseDDMMYYYY_HHMMSS(va) || new Date(0);
+      const db = parseDDMMYYYY_HHMMSS(vb) || new Date(0);
+      return (da - db) * dir;
+    }
+
+    // string
+    return norm(va).localeCompare(norm(vb), "vi") * dir;
+  };
+
+  return [...rows].sort(cmp);
+}
+
+function render(){
+  renderKPI();
+  renderChips();
+  renderTableOnly();
+  renderSortIndicators();
+}
+
+function renderKPI(){
+  const rows = state.filtered;
+  $("kpiTotal").textContent = rows.length.toLocaleString("vi-VN");
+  $("kpiTotalSub").textContent = `Từ tổng ${DATA.length.toLocaleString("vi-VN")} dòng`;
+
+  const pending = rows.filter(r => lower(r.deliveryStatus).includes("chờ giao")).length;
+  $("kpiPending").textContent = pending.toLocaleString("vi-VN");
+
+  const done = rows.filter(isDoneRow).length;
+  $("kpiDone").textContent = done.toLocaleString("vi-VN");
+
+  const sum = rows.reduce((acc,r)=>acc + Number(r.totalAmount||0), 0);
+  $("kpiAmount").textContent = fmtMoney(sum);
+}
+
+function renderChips(){
+  const f = collectFilters();
+  const chips = [];
+  const push = (k, v, label)=>{
+    if(v == null || v === "") return;
+    chips.push(`<span class="chip" title="${escapeHTML(label)}"><span class="mono">${escapeHTML(k)}</span>: ${escapeHTML(String(v))}</span>`);
+  };
+
+  push("q", f.q, "Tìm nhanh");
+  push("Nguồn", f.source, "Nguồn");
+  push("Loại", f.type, "Loại");
+  push("TT giao", f.deliveryStatus, "Trạng thái giao hàng");
+  push("TT phiếu", f.ticketStatus, "Trạng thái phiếu");
+  push("Đối soát", f.reconStatus, "Trạng thái đối soát");
+  push("Thanh toán", f.paymentStatus, "Trạng thái thanh toán");
+  push("Nhận hàng", f.receiveStatus, "Trạng thái nhận hàng");
+  push("Mã KH", f.customerCode, "Mã khách hàng");
+  push("Mã NVBH", f.salesCode, "Mã NVBH");
+  push("Từ ngày", f.orderDateFrom ? f.orderDateFrom.toISOString().slice(0,10) : "", "Ngày đơn hàng từ");
+  push("Đến ngày", f.orderDateTo ? f.orderDateTo.toISOString().slice(0,10) : "", "Ngày đơn hàng đến");
+  push("Tiền ≥", f.amountMin ?? "", "Tổng tiền từ");
+  push("Tiền ≤", f.amountMax ?? "", "Tổng tiền đến");
+
+  $("activeChips").innerHTML = chips.length ? chips.join("") : `<span class="muted">Chưa áp dụng bộ lọc nào.</span>`;
+}
+
+function renderSortIndicators(){
+  document.querySelectorAll("thead th[data-key] .sort").forEach(s=>s.textContent = "");
+  if(!state.sortKey) return;
+  const el = $("s-" + state.sortKey);
+  if(el) el.textContent = state.sortDir === "asc" ? "↑" : "↓";
+}
+
+function renderTableOnly(){
+  const rows = applySort(state.filtered);
+
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+  state.page = Math.min(state.page, totalPages);
+
+  const start = (state.page - 1) * state.pageSize;
+  const pageRows = rows.slice(start, start + state.pageSize);
+
+  $("pageMeta").textContent = `Trang ${state.page}/${totalPages}`;
+  $("resultMeta").textContent = `Hiển thị ${pageRows.length.toLocaleString("vi-VN")} / ${total.toLocaleString("vi-VN")} dòng (đã lọc)`;
+
+  const tbody = $("tbody");
+  const frag = document.createDocumentFragment();
+
+  pageRows.forEach((r, idx)=>{
+    const tr = document.createElement("tr");
+    tr.setAttribute("role", "row");
+    tr.addEventListener("click", ()=>openDetail(r));
+
+    const deliveryBadge = badgeHTML(badgeKindForDelivery(r.deliveryStatus), r.deliveryStatus || "—");
+
+    tr.innerHTML = `
+      <td class="sticky-1 mono">${escapeHTML(r.orderNo || "—")}</td>
+      <td class="sticky-2 mono">${escapeHTML(r.voucherNo || "—")}</td>
+
+      <td class="nowrap">${escapeHTML(r.source || "—")}</td>
+      <td class="nowrap">${escapeHTML(r.type || "—")}</td>
+      <td class="nowrap">${escapeHTML(r.orderDate || "—")}</td>
+      <td class="nowrap hide-sm">${escapeHTML(r.deliveryDate || "—")}</td>
+
+      <td class="mono nowrap">${escapeHTML(r.customerCode || "—")}</td>
+      <td>${escapeHTML(r.customerName || "—")}</td>
+      <td class="addr">${escapeHTML(r.shipTo || "—")}</td>
+
+      <td class="nowrap">${deliveryBadge}</td>
+      <td class="nowrap hide-sm">${escapeHTML(r.ticketStatus || "—")}</td>
+      <td class="nowrap hide-sm">${escapeHTML(r.reconStatus || "—")}</td>
+      <td class="nowrap hide-sm">${escapeHTML(r.paymentStatus || "—")}</td>
+      <td class="nowrap hide-sm">${escapeHTML(r.receiveStatus || "—")}</td>
+
+      <td class="nowrap hide-sm">${escapeHTML(r.actualDelivered || "—")}</td>
+      <td class="nowrap hide-sm">${escapeHTML(r.directReceive || "—")}</td>
+
+      <td class="mono nowrap">${escapeHTML(r.salesCode || "—")}</td>
+      <td class="nowrap hide-sm">${escapeHTML(r.salesName || "—")}</td>
+
+      <td class="money mono nowrap">${fmtMoney(r.totalAmount || 0)}</td>
+      <td class="hide-sm">${escapeHTML(r.note || "—")}</td>
+
+      <td class="nowrap hide-sm">${escapeHTML(r.createdBy || "—")}</td>
+      <td class="nowrap hide-sm mono">${escapeHTML(r.createdAt || "—")}</td>
+      <td class="nowrap hide-sm">${escapeHTML(r.updatedBy || "—")}</td>
+      <td class="nowrap hide-sm mono">${escapeHTML(r.updatedAt || "—")}</td>
+    `;
+    frag.appendChild(tr);
+  });
+
+  tbody.innerHTML = "";
+  tbody.appendChild(frag);
+}
+
+function openDetail(r){
+  const dlg = $("dlg");
+  $("dlgTitle").textContent = `Chi tiết: ${r.orderNo || "—"} / ${r.voucherNo || "—"}`;
+  dlg.dataset.rowJson = JSON.stringify(r, null, 2);
+
+  const pairs = [
+    ["Số đơn hàng", r.orderNo],
+    ["Số chứng từ", r.voucherNo],
+    ["Nguồn", r.source],
+    ["Loại", r.type],
+    ["Ngày đơn hàng", r.orderDate],
+    ["Ngày giao hàng", r.deliveryDate],
+    ["Mã khách hàng", r.customerCode],
+    ["Khách hàng", r.customerName],
+    ["Địa chỉ giao", r.shipTo],
+    ["Trạng thái giao hàng", r.deliveryStatus],
+    ["Trạng thái phiếu", r.ticketStatus],
+    ["Trạng thái đối soát", r.reconStatus],
+    ["Trạng thái thanh toán", r.paymentStatus],
+    ["Trạng thái nhận hàng", r.receiveStatus],
+    ["Thực giao", r.actualDelivered],
+    ["Trực nhận", r.directReceive],
+    ["Mã NVBH", r.salesCode],
+    ["Tên NVBH", r.salesName],
+    ["Tổng thành tiền (VNĐ)", fmtMoney(r.totalAmount || 0)],
+    ["Ghi chú", r.note],
+    ["Người tạo", r.createdBy],
+    ["Ngày tạo", r.createdAt],
+    ["Người cập nhật", r.updatedBy],
+    ["Ngày cập nhật", r.updatedAt]
+  ];
+
+  $("dlgKv").innerHTML = pairs.map(([k,v])=>`
+    <div class="item">
+      <div class="k">${escapeHTML(k)}</div>
+      <div class="v">${escapeHTML(v || "—")}</div>
+    </div>
+  `).join("");
+
+  dlg.showModal();
+}
+
+function exportCSV(rows){
+  const cols = [
+    "orderNo","voucherNo","source","type","orderDate","deliveryDate",
+    "customerCode","customerName","shipTo",
+    "deliveryStatus","ticketStatus","reconStatus","paymentStatus","receiveStatus",
+    "actualDelivered","directReceive",
+    "salesCode","salesName","totalAmount","note",
+    "createdBy","createdAt","updatedBy","updatedAt"
+  ];
+  const header = cols.join(",");
+  const lines = rows.map(r => cols.map(c => csvCell(r[c])).join(","));
+  const csv = [header, ...lines].join("\n");
+
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `phieu-giao-hang_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+function csvCell(v){
+  const s = norm(v);
+  const needs = /[,"\n]/.test(s);
+  const safe = s.replace(/"/g, '""');
+  return needs ? `"${safe}"` : safe;
+}
+
+init();
+</script>
+</body>
+</html>
